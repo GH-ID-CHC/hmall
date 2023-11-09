@@ -1,0 +1,5 @@
+# Project exclude paths
+/card-service/target/
+/hm-common/target/
+/hm-service/target/
+/item-service/target/
