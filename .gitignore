@@ -3,3 +3,5 @@
 /hm-common/target/
 /hm-service/target/
 /item-service/target/
+/.idea/
+/logs/
