@@ -3,8 +3,9 @@ package com.hmall.card.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmall.api.client.ItemClient;
+import com.hmall.api.dto.ItemDTO;
 import com.hmall.card.domian.dto.CartFormDTO;
-import com.hmall.card.domian.dto.ItemDTO;
 import com.hmall.card.domian.po.Cart;
 import com.hmall.card.domian.vo.CartVO;
 import com.hmall.card.mapper.CartMapper;
@@ -14,14 +15,10 @@ import com.hmall.common.utils.BeanUtils;
 import com.hmall.common.utils.CollUtils;
 import com.hmall.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +39,11 @@ import java.util.stream.Collectors;
 public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements ICartService {
 
 //    private final IItemService itemService;
-    private final RestTemplate restTemplate;
+//    private final RestTemplate restTemplate;
+
+//    private final DiscoveryClient discoveryClient;
+
+    private final ItemClient itemClient;
     @Override
     public void addItem2Cart(CartFormDTO cartFormDTO) {
         // 1.获取登录用户
@@ -86,8 +87,22 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     private void handleCartItems(List<CartVO> vos) {
         Set<Long> itemIds = vos.stream().map(CartVO::getItemId).collect(Collectors.toSet());
+        List<ItemDTO> items = itemClient.queryItemByIds(itemIds);
+        if (CollUtils.isEmpty(items)){
+            return;
+        }
+
+/*//        根据服务的名称从nacos中获取服务的实例列表
+        List<ServiceInstance> instances = discoveryClient.getInstances("item-service");
+        if (CollUtils.isEmpty(instances)){
+//            查询失败
+            return;
+        }
+//        根据随机的负载均衡策略
+        ServiceInstance serviceInstance = instances.get(RandomUtil.randomInt(instances.size()));
+
         ResponseEntity<List<ItemDTO>> responseEntity = restTemplate.exchange(
-                "http://localhost:8081/items?ids={ids}",
+                serviceInstance.getUri()+"/items?ids={ids}",
                 HttpMethod.GET,
                 null,
 //                返回的类型-->List<ItemDTO>
@@ -103,7 +118,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         // 2.查询商品
         if (CollUtils.isEmpty(items)) {
             return;
-        }
+        }*/
         // 3.转为 id 到 item的map
         Map<Long, ItemDTO> itemMap = items.stream().collect(Collectors.toMap(ItemDTO::getId, Function.identity()));
         // 4.写入vo
