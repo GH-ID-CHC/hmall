@@ -7,7 +7,7 @@ import com.hmall.common.utils.BeanUtils;
 import com.hmall.item.domain.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
 import com.hmall.item.mapper.ItemMapper;
-import com.hmall.item.service.IItemService;
+import com.hmall.item.service.ItemService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.List;
  * @author 虎哥
  */
 @Service
-public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements IItemService {
+public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements ItemService {
 
     @Override
     public void deductStock(List<OrderDetailDTO> items) {
