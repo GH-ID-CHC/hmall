@@ -3,7 +3,7 @@ package com.hmall.item.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hmall.api.dto.ItemDTO;
-import com.hmall.item.domain.dto.OrderDetailDTO;
+import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
 
 import java.util.Collection;
