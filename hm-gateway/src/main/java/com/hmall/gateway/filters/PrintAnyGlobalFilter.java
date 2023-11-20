@@ -1,7 +1,9 @@
-package com.hmall.gateway.filters;/**
+package com.hmall.gateway.filters;
+/**
  * Author: CHAI
  * Date: 2023/11/14
  */
+
 
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
  * @author:
  * @create: 2023-11-14 21:17
  **/
+
 @Component
 public class PrintAnyGlobalFilter implements GlobalFilter , Ordered {
     @Override
@@ -26,6 +29,6 @@ public class PrintAnyGlobalFilter implements GlobalFilter , Ordered {
 
     @Override
     public int getOrder() {
-        return 0;
+        return 2;
     }
 }
