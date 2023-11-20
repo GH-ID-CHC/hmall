@@ -3,7 +3,9 @@ package com.hmall.api.config;/**
  * Date: 2023/11/12
  */
 
+import com.hmall.api.interceptors.UserInfoInterceptor;
 import feign.Logger;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 
 
@@ -19,5 +21,11 @@ public class DefaultFeignConfig {
     @Bean
     public Logger.Level feignLogLevel(){
         return Logger.Level.FULL;
+    }
+
+//    启动UserInfoInterceptor的配置
+    @Bean
+    public UserInfoInterceptor userInfoInterceptor(){
+        return new UserInfoInterceptor();
     }
 }
