@@ -16,6 +16,11 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
+        <!--seata-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
         <!--sentinel-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
