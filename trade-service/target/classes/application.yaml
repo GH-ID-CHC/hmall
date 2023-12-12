@@ -1,0 +1,12 @@
+server:
+  port: 8086
+hm:
+  db:
+    database: hm-trade
+    port: 3307
+  swagger:
+    title: 黑马商城订单管理接口文档
+    package: com.hmall.trade.controller
+feign:
+  sentinel:
+    enabled: true # 开启feign对sentinel的支持
