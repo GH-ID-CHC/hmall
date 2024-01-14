@@ -7,6 +7,13 @@ hm:
   swagger:
     title: 黑马商城订单管理接口文档
     package: com.hmall.trade.controller
+spring:
+  rabbitmq:
+    host: 192.168.114.128
+    port: 5672
+    virtual-host: /hmall  #虚拟主机名称
+    username: hmall     #用户名
+    password: 123        #密码
 feign:
   sentinel:
     enabled: true # 开启feign对sentinel的支持
