@@ -1,5 +1,6 @@
 package com.hmall.trade.listeners;
 
+import com.hmall.trade.domain.po.Order;
 import com.hmall.trade.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -32,6 +33,13 @@ public class PayStatusListener {
             key = {"pay.success"}
     ))
     public void listnerMq(Long orderId){
+
+        Order order = iOrderService.getById(orderId);
+
+        if (order == null || order.getStatus()!=1){
+            return;
+        }
+
         //把订单状态修改为已支付
         iOrderService.markOrderPaySuccess(orderId);
     }
