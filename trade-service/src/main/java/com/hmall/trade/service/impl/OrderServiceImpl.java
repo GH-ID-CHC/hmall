@@ -5,7 +5,10 @@ import com.hmall.api.client.CartClient;
 import com.hmall.api.client.ItemClient;
 import com.hmall.api.dto.ItemDTO;
 import com.hmall.api.dto.OrderDetailDTO;
+import com.hmall.common.constants.MqConstants;
+import com.hmall.common.domain.MultiDelayMessage;
 import com.hmall.common.exception.BadRequestException;
+import com.hmall.common.mq.DelayMessageProcessor;
 import com.hmall.common.utils.UserContext;
 import com.hmall.trade.domain.dto.OrderFormDTO;
 import com.hmall.trade.domain.po.Order;
@@ -15,6 +18,8 @@ import com.hmall.trade.service.IOrderDetailService;
 import com.hmall.trade.service.IOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +48,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 //    private final ICartService cartService;
 
     private final CartClient cartClient;
+
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @GlobalTransactional
@@ -86,7 +93,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         } catch (Exception e) {
             throw new RuntimeException("库存不足！");
         }
-        return order.getId();
+        //发送延迟消息
+        try {
+            MultiDelayMessage<Long> stringMultiDelayMessage = MultiDelayMessage.of(
+                    order.getId(), 1000L, 1000L, 1000L, 1000L,1000L);
+//        stringMultiDelayMessage.removeNextDelay() 移除最前的时间，从而获取到list中的延迟时间
+            DelayMessageProcessor delayMessageProcessor = new DelayMessageProcessor(stringMultiDelayMessage.removeNextDelay().intValue());
+            rabbitTemplate.convertAndSend(MqConstants.DELAY_EXCHANGE,MqConstants.DELAY_ORDER_ROUTING_KEY,stringMultiDelayMessage,delayMessageProcessor);
+            return order.getId();
+        } catch (AmqpException e) {
+            log.error("发送延迟消息异常");
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -96,6 +114,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(2);
         order.setPayTime(LocalDateTime.now());
         updateById(order);
+    }
+
+    @GlobalTransactional
+    @Override
+    public void cancelOrder(Long orderId) {
+        //1.取消订单
+        lambdaUpdate().set(Order::getStatus,5)
+                .set(Order::getCloseTime,LocalDateTime.now())
+                .eq(Order::getId,orderId)
+                .update();
+        //2.恢复库存
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {
